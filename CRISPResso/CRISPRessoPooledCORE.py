@@ -16,6 +16,7 @@ import unicodedata
 import string
 import re
 import multiprocessing
+import pyfaidx
 
 
 import logging
@@ -139,9 +140,8 @@ def get_align_sequence(seq,bowtie2_index):
 #if a reference index is provided aligne the reads to it
 #extract region
 def get_region_from_fa(chr_id,bpstart,bpend,uncompressed_reference):
-    region='%s:%d-%d' % (chr_id,bpstart,bpend-1)
-    p = sb.Popen("samtools faidx %s %s |   grep -v ^\> | tr -d '\n'" %(uncompressed_reference,region), shell=True,stdout=sb.PIPE)
-    return p.communicate()[0]
+    f = pyfaidx.Fasta(uncompressed_reference, as_raw=True)
+    return f[chr_id][bpstart-1:bpend-1]
 
 def get_n_reads_fastq(fastq_filename):
      p = sb.Popen(('z' if fastq_filename.endswith('.gz') else '' ) +"cat < %s | wc -l" % fastq_filename , shell=True,stdout=sb.PIPE)
